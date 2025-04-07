@@ -1,10 +1,11 @@
 import "reflect-metadata"
-import express from "express"
+import express, { Request } from "express"
 import dotenv from "dotenv"
 import { myDataSource } from "./ormconfig"
 import { buildSchema } from "type-graphql"
 import { UserResolver } from "./resolvers/UserResolver"
 import { ApolloServer } from "apollo-server-express"
+import { getUser } from "./utils/auth"
 
 (async () => {
     dotenv.config()
@@ -26,7 +27,7 @@ import { ApolloServer } from "apollo-server-express"
 
     const server = new ApolloServer({
         schema,
-        plugins: []
+        context: async ({ req }) => ({req})
     })
     await server.start()
 

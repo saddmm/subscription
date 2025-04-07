@@ -7,7 +7,7 @@ import { Message } from "./Message";
 export class User {
     @Field(() => ID)
     @PrimaryGeneratedColumn('uuid')
-    id: number
+    id: string
 
     @Field()
     @Column({unique: true})
@@ -17,17 +17,18 @@ export class User {
     @Column({unique: true})
     email: string
 
+    @Field()
     @Column()
     password: string
 
     @Field(() => [User], {nullable: true})
     @ManyToMany(() => User, (user) => user.following)
     @JoinTable()
-    followedBy?: User[]
+    followedBy: User[]
 
     @Field(() => [User], {nullable: true})
     @ManyToMany(() => User, (user) => user.followedBy)
-    following?: User[]
+    following: User[]
 
     @Field(() => [Message],{ nullable: true })
     @OneToMany(() => Message, (message) => message.user)
