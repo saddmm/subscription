@@ -1,6 +1,8 @@
 import { User } from "../entities/User"
 import jwt from "jsonwebtoken";
 import { Request } from "express";
+import { AuthChecker } from "type-graphql";
+import { Context } from "../types/myContext";
 
 const JWT_SECRET = "!Pz)zOij.DhZ|4lhdn=^FLD%e;((AcGh"
 
@@ -17,4 +19,9 @@ export const getUser = (req: Request) => {
     } catch {
         return null
     }
+}
+
+export const authChecker: AuthChecker<Context> = ({ context }) => {
+    const userId = getUser(context.req)
+    return !userId
 }
