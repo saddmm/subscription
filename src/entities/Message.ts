@@ -19,7 +19,15 @@ export class Message {
 	@Field()
 	@Column()
 	body: string;
+	
+	@Field(() => User)
+	@ManyToOne(() => User, (user) => user.sendMessages)
+	sender: User
 
+	@Field(() => User)
+	@ManyToOne(() => User, (user) => user.receiveMessage)
+	receiver: User
+	
     @Field()
 	@CreateDateColumn({
 		type: "timestamp",
@@ -35,7 +43,4 @@ export class Message {
 	})
     updateAt: Date;
     
-    @Field(() => User)
-    @ManyToOne(() => User, (user) => user.message)
-    user: User
 }

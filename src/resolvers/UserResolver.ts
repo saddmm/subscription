@@ -3,7 +3,7 @@ import { User } from "../entities/User";
 import { myDataSource } from "../ormconfig";
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver, Root, Subscription } from "type-graphql";
 import bcrypt from "bcrypt";
-import { createToken, getUser } from "../utils/auth";
+import { createToken } from "../utils/auth";
 import { Context } from "../types/myContext";
 import { PubSubEngine } from "graphql-subscriptions";
 
@@ -38,7 +38,7 @@ export class UserResolver {
     @Query(() => User, { nullable: true })
     @Authorized()
     async getUser(@Ctx() ctx: Context) {
-        const userId = getUser(ctx.req)
+        const userId = ctx.userId
         if (!userId) return null
         
         return await userRepository.findOneBy({id: userId})
@@ -50,7 +50,7 @@ export class UserResolver {
         @Arg("followerId") followerId: string,
         @Ctx() ctx: Context,
     ) {
-        const userId = getUser(ctx.req)
+        const userId = ctx.userId
         if (!userId) throw new Error("Login dulu")
         
         if (userId === followerId) throw new Error("tidak bisa follow diri sendiri")
@@ -77,8 +77,9 @@ export class UserResolver {
     @Subscription(() => User, {
         topics: "FOLLOW_EVENT"
     })
-    @Authorized()
+    // @Authorized()
     newFollower(@Root() payload: { newFollower: User }) {
+        console.log(payload)
         return payload.newFollower
     }
 

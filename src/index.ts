@@ -5,12 +5,16 @@ import { myDataSource } from "./ormconfig"
 import { buildSchema } from "type-graphql"
 import { UserResolver } from "./resolvers/UserResolver"
 import { ApolloServer } from "apollo-server-express"
-import { createPubSub } from "@graphql-yoga/subscription"
 import { createServer } from "http"
 import { SubscriptionServer } from "subscriptions-transport-ws"
+import { authChecker, verifyToken } from "./utils/auth"
+// import { pubSub } from "./utils/redis"
 import { execute, subscribe } from "graphql"
-import { authChecker, getUser } from "./utils/auth"
 import { Context } from "./types/myContext"
+// import { pubSub } from "./utils/redis"
+import { User } from "./entities/User"
+import { MessageResolver } from "./resolvers/messageResolver"
+import { createPubSub } from "graphql-yoga"
 
 (async () => {
     dotenv.config()
@@ -30,32 +34,44 @@ import { Context } from "./types/myContext"
         })
     
     const schema = await buildSchema({
-        resolvers: [UserResolver],
+        resolvers: [UserResolver, MessageResolver],
         pubSub,
+        // validate: false,
         authChecker
     })
 
     const server = new ApolloServer({
         schema,
-        context: async ({ req }) => ({ req, pubSub })
+        context: async ({ req }) => {
+            const token = req.headers.authorization
+            let userId = null
+            if (token) {
+                userId = verifyToken(token)
+            }
+            return {req, pubSub, userId}
+        },
     })
     await server.start()
 
     server.applyMiddleware({ app })
 
-    SubscriptionServer.create({
-        schema,
-        execute,
-        subscribe,
-        onConnect: (ctx: Context) => {
-            const userId = getUser(ctx.req)
-            if (!userId) throw new Error("Unauthorized")
-            return userId
+    SubscriptionServer.create(
+        {
+            schema,
+            execute,
+            subscribe,
+            onConnect: async (connectionParams: any) => {
+                const token = connectionParams?.Authorization
+                if (!token) throw new Error("Unauthorized")
+                const userId = verifyToken(token)
+                return {userId}
+            }
+        },
+        {
+            server: httpServer,
+            path: "/graphql"
         }
-    }, {
-        server: httpServer,
-        path: "/graphql"
-    })
+    );
 
     const PORT = process.env.PORT || 3000
 

@@ -31,6 +31,10 @@ export class User {
     following: User[]
 
     @Field(() => [Message],{ nullable: true })
-    @OneToMany(() => Message, (message) => message.user)
-    message: Message[]
+    @OneToMany(() => Message, (message) => message.sender)
+    sendMessages: Message[]
+
+    @Field(() => [Message], { nullable: true })
+    @OneToMany(() => Message, (message) => message.receiver)
+    receiveMessage: Message[]
 }

@@ -10,18 +10,22 @@ export const createToken = (user: User) => {
     return jwt.sign({userId: user.id}, JWT_SECRET, {expiresIn: "7d"})
 }
 
-export const getUser = (req: Request) => {
-    const auth = req.headers.authorization
-    if (!auth) return null
+export const verifyToken = (token: string) => {
     try {
-        const decoded: any = jwt.verify(auth.replace("Bearer ", ""), JWT_SECRET)
+        const decoded: any = jwt.verify(token.replace("Bearer ", ""), JWT_SECRET)
         return decoded.userId
-    } catch {
-        return null
+    } catch (err) {
+        return err
     }
 }
 
+// export const getUser = async (req: Request) => {
+//     const auth = req.headers.authorization
+//     if (!auth) return null
+//     return verifyToken(auth)
+// }
+
 export const authChecker: AuthChecker<Context> = ({ context }) => {
-    const userId = getUser(context.req)
-    return !userId
+    const userId = context.userId
+    return !!userId
 }

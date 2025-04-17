@@ -3,5 +3,6 @@ import { PubSub } from "graphql-subscriptions";
 
 export interface Context {
     req: Request
-    pubSub: PubSub
+    pubSub: PubSub,
+    userId?: string
 }
