@@ -1,16 +1,6 @@
-import Redis from "ioredis"
-import dotenv from "dotenv"
-import { RedisPubSub } from "graphql-redis-subscriptions"
-import { time } from "console"
+import { RedisOptions } from "ioredis";
 
-dotenv.config()
-
-export const pubSub = new RedisPubSub({
-    connection: {
-        host: "localhost",
-        port: 6379,
-        retryStrategy(times) {
-            return Math.max(times * 100, 3000)
-        },
-    }
-})
+export const redisOptions: RedisOptions = {
+    host: 'localhost',
+    port: 6379
+}

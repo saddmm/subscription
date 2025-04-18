@@ -1,6 +1,6 @@
 import { myDataSource } from "../ormconfig";
 import { Message } from "../entities/Message";
-import { Arg, Ctx, Mutation, Resolver, Root, Subscription } from "type-graphql";
+import { Arg, Authorized, Ctx, Mutation, Query, Resolver, Root, Subscription } from "type-graphql";
 import { messageInput } from "../dto/message.dto";
 import { Context } from "../types/myContext";
 import { User } from "../entities/User";
@@ -34,5 +34,31 @@ export class MessageResolver {
     })
     newMessage(@Root() payload: Message) {
         return payload
+    }
+
+    @Query(() => [Message])
+    @Authorized()
+    async getMessage(@Ctx() ctx: Context,
+        @Arg('receiverId', { nullable: true }) receiverId?: string
+        ) {
+        const sender = await userRepository.findOneBy({ id: ctx.userId })
+        if(!sender) throw new Error("User not found")
+        if (receiverId) {
+            const receiver = await userRepository.findOneBy({ id: receiverId })
+            if (!receiver) throw new Error("User not found")
+            return await messageRepository.find({
+                where: {
+                    receiver,
+                    sender
+                },
+                relations: ["sender", "receiver"]
+            })
+        }
+        return await messageRepository.find({
+            where: {
+                sender
+            },
+            relations: ["sender", "receiver"]
+        })
     }
 }

@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType } from "type-graphql";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Message } from "./Message";
+import { Post } from "./Post";
 
 @ObjectType()
 @Entity()
@@ -30,6 +31,10 @@ export class User {
     @ManyToMany(() => User, (user) => user.followedBy)
     following: User[]
 
+    @Field(() => [Post], {nullable: true})
+    @OneToMany(() => Post, (post) => post.creator)
+    posts: Post[]
+
     @Field(() => [Message],{ nullable: true })
     @OneToMany(() => Message, (message) => message.sender)
     sendMessages: Message[]
@@ -37,4 +42,6 @@ export class User {
     @Field(() => [Message], { nullable: true })
     @OneToMany(() => Message, (message) => message.receiver)
     receiveMessage: Message[]
+
+
 }

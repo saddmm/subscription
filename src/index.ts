@@ -13,8 +13,9 @@ import { execute, subscribe } from "graphql"
 import { Context } from "./types/myContext"
 // import { pubSub } from "./utils/redis"
 import { User } from "./entities/User"
-import { MessageResolver } from "./resolvers/messageResolver"
+import { MessageResolver } from "./resolvers/MessageResolver"
 import { createPubSub } from "graphql-yoga"
+import { PostResolver } from "./resolvers/PostResolver"
 
 (async () => {
     dotenv.config()
@@ -34,7 +35,7 @@ import { createPubSub } from "graphql-yoga"
         })
     
     const schema = await buildSchema({
-        resolvers: [UserResolver, MessageResolver],
+        resolvers: [UserResolver, MessageResolver, PostResolver],
         pubSub,
         // validate: false,
         authChecker
